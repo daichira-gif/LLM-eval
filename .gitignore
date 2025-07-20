@@ -1,0 +1,5 @@
+# Ignore xlsx files
+*.xlsx
+
+# Ignore output directory
+output/
