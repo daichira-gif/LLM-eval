@@ -24,11 +24,30 @@ export INPUT_PATH=/eval/input/math.jsonl
 export OUTPUT_BASE_DIR=/eval/output/${EXPERIMENT_ID}
 export INFO_LOG_FILE=${OUTPUT_BASE_DIR}/info.txt
 export TEMPERATURE=0
+export OPENROUTER_API_KEY=your_openrouter_key
 python scripts/openrouter_eval.py
 ```
 
 Make sure `OPENROUTER_API_KEY` is set in the environment to allow API access.
-<<<<<< codex/update-model-variable-and-add-branching-logic
+
+
+## OpenRouter evaluation with round_test.sh
+
+`round_test.sh` can be modified to call `scripts/openrouter_eval.py` so that multiple evaluation prompts are executed in sequence. Example environment setup:
+
+```bash
+export MODEL_NAME=qwen/qwen3-32b:free
+export INPUT_PATH=/eval/input/math.jsonl
+export EXPERIMENT_ID=basemodel
+export OUTPUT_BASE_DIR=/eval/output/${EXPERIMENT_ID}
+export INFO_LOG_FILE=${OUTPUT_BASE_DIR}/info.txt
+export TEMPERATURE=0
+export OPENROUTER_API_KEY=your_openrouter_key
+./round_test.sh
+```
+
+The script will generate one output file for each prompt in the array and log the overall accuracy.
+
 To evaluate a local model instead, execute `round_test.sh`. When `USE_OPENROUTER=true` is set the script will invoke `openrouter_eval.py`; otherwise it runs the local inference scripts bundled in this repository.
 
 ## Environment variables
@@ -43,7 +62,6 @@ Several scripts read configuration from environment variables:
 - `LORA` and `GPU_MEMORY_UTILIZATION` – options for local evaluation scripts.
 - `USE_OPENROUTER` – if set to `true`, `round_test.sh` runs `openrouter_eval.py` instead of local scripts.
 - `INFO_LOG_FILE` – log file path (default `${OUTPUT_BASE_DIR}/info.txt`).
-=======
 ## Development setup
 
 Install runtime requirements and the additional development tools:
