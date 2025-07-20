@@ -10,7 +10,7 @@ def main():
     for i, item in enumerate(dataset):
         formatted_item = {
             "id": i + 1,
-            "text": item["query"],
+            "text": item["question"],
             "gold": str(item["solution"]),
             "response": "",
             "type": item["domain"],
