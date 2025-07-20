@@ -1,4 +1,4 @@
-{"id": 0, "text": "$x^{-1}>x$を満たす正の整数$x$の個数を求めなさい。", "gold": "0", "response": "", "type": "Algebra", "level": "Level 2"}
+moto{"id": 0, "text": "$x^{-1}>x$を満たす正の整数$x$の個数を求めなさい。", "gold": "0", "response": "", "type": "Algebra", "level": "Level 2"}
 {"id": 1, "text": "\\(y = f(x)\\) のグラフ上に点 \\((2,9)\\) があるとき、\\(y = f(-x)\\) のグラフ上に必ずある点が存在します。その点の\\(x\\)座標と\\(y\\)座標の和を求めなさい。", "gold": "7", "response": "", "type": "Algebra", "level": "Level 4"}
 {"id": 2, "text": "関数 \\( m(x) = \\sqrt{x + 5} + \\sqrt{20 - x} \\) の値域を求めなさい。", "gold": "[5,5 \\sqrt{2}]", "response": "", "type": "Intermediate Algebra", "level": "Level 4"}
 {"id": 3, "text": "二つの多項式 \\( P(x) = x^6-x^5-x^3-x^2-x \\) と \\( Q(x)=x^4-x^3-x^2-1 \\) があります。\\( Q(x) = 0 \\) の解を \\( z_1, z_2, z_3, z_4 \\) とするとき、\\( P(z_1) + P(z_2) + P(z_3) + P(z_4) \\) の値を求めなさい。", "gold": "6", "response": "", "type": "Intermediate Algebra", "level": "Level 5"}
