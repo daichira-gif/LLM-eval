@@ -33,9 +33,9 @@ else
     python scripts/$arg.py $MODEL_NAME \
       --input_path=$INPUT_PATH \
       --output_path=$output_dir \
-      --enable_lora=$lora \
-      --gpu_memory_utilization=$gpu \
-      --temperature=$temperature
+      --enable_lora=$LORA \
+      --gpu_memory_utilization=$GPU_MEMORY_UTILIZATION \
+      --temperature=$TEMPERATURE
     python scripts/eval.py --input_path=$output_dir --log_path=$INFO_LOG_FILE
 
   done
