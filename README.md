@@ -28,3 +28,16 @@ python scripts/openrouter_eval.py
 ```
 
 Make sure `OPENROUTER_API_KEY` is set in the environment to allow API access.
+
+## Development setup
+
+Install runtime requirements and the additional development tools:
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+With the hooks installed, formatting and lint checks are run automatically on
+each commit.
