@@ -158,9 +158,12 @@ def is_equiv(str1, str2, verbose=False):
         if verbose:
             print(ss1, ss2)
         return ss1 == ss2
-    except:
+
+    except Exception:
         return False
-=import json
+
+import json
+
 from urllib import response
 
 

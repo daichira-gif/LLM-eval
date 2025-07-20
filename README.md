@@ -13,17 +13,44 @@ python scripts/prepare_math_dataset.py
 
 ## Running evaluation
 
-`scripts/openrouter_eval.py` runs inference using OpenRouter and logs the accuracy. The script reads configuration from environment variables such as `MODEL_NAME`, `OUTPUT_BASE_DIR` and `INFO_LOG_FILE`.
+Evaluation behavior is controlled entirely through environment variables.
 
-Example:
+### Required variables
+
+- `MODEL_NAME` – Local model path or OpenRouter model identifier.
+- `INPUT_PATH` – Path to the JSONL dataset.
+- `OUTPUT_BASE_DIR` – Directory where outputs are written.
+- `EXPERIMENT_ID` – Label appended to output files.
+- `INFO_LOG_FILE` – Log file path (defaults to `$OUTPUT_BASE_DIR/info.txt`).
+- `TEMPERATURE` – Sampling temperature.
+- `USE_OPENROUTER` – When set to `true`, `scripts/openrouter_eval.py` is used. Otherwise the local scripts are run.
+- `OPENROUTER_API_KEY` – Required only when `USE_OPENROUTER=true`.
+
+### Example (OpenRouter)
 
 ```bash
+export USE_OPENROUTER=true
 export EXPERIMENT_ID=basemodel
 export MODEL_NAME=qwen/qwen3-32b:free
 export INPUT_PATH=/eval/input/math.jsonl
 export OUTPUT_BASE_DIR=/eval/output/${EXPERIMENT_ID}
 export INFO_LOG_FILE=${OUTPUT_BASE_DIR}/info.txt
 export TEMPERATURE=0
+
+python round_test.sh
+```
+
+### Example (local)
+
+```bash
+export MODEL_NAME=/path/to/local/model
+export INPUT_PATH=/eval/input/math.jsonl
+export EXPERIMENT_ID=basemodel
+python round_test.sh
+```
+
+When `USE_OPENROUTER=true`, ensure `OPENROUTER_API_KEY` is available in the environment.
+=======
 export OPENROUTER_API_KEY=your_openrouter_key
 python scripts/openrouter_eval.py
 ```
@@ -88,4 +115,4 @@ pre-commit install
 ```
 
 With the hooks installed, formatting and lint checks are run automatically on
-each comm
+
