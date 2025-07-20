@@ -28,7 +28,7 @@ python scripts/openrouter_eval.py
 ```
 
 Make sure `OPENROUTER_API_KEY` is set in the environment to allow API access.
-
+<<<<<< codex/update-model-variable-and-add-branching-logic
 To evaluate a local model instead, execute `round_test.sh`. When `USE_OPENROUTER=true` is set the script will invoke `openrouter_eval.py`; otherwise it runs the local inference scripts bundled in this repository.
 
 ## Environment variables
@@ -43,3 +43,15 @@ Several scripts read configuration from environment variables:
 - `LORA` and `GPU_MEMORY_UTILIZATION` – options for local evaluation scripts.
 - `USE_OPENROUTER` – if set to `true`, `round_test.sh` runs `openrouter_eval.py` instead of local scripts.
 - `INFO_LOG_FILE` – log file path (default `${OUTPUT_BASE_DIR}/info.txt`).
+=======
+## Development setup
+
+Install runtime requirements and the additional development tools:
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+With the hooks installed, formatting and lint checks are run automatically on

@@ -3,6 +3,7 @@ import json
 import argparse
 from vllm import LLM, SamplingParams
 
+
 def extract_boxed_answer_rev(text: str) -> str:
     """
     テキスト中から最初の \boxed{...} の中身（ネストを考慮）を抽出する。
@@ -23,7 +24,8 @@ def extract_boxed_answer_rev(text: str) -> str:
             brace_count -= 1
         i += 1
     # i-1 が閉じ括弧に対応する位置
-    return text[start_idx:i-1].strip().replace(",","")
+    return text[start_idx : i - 1].strip().replace(",", "")
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -33,7 +35,7 @@ def main():
     parser.add_argument("--output_path", type=str, required=True)
     parser.add_argument("--num_gpus", type=int, default=1)
     parser.add_argument("--enable_lora", type=str, default=False)
-    parser.add_argument("--gpu_memory_utilization", type=float, default=0.9)     
+    parser.add_argument("--gpu_memory_utilization", type=float, default=0.9)
     parser.add_argument("--temperature", type=float, default=0.6)
 
     args = parser.parse_args()
@@ -43,33 +45,39 @@ def main():
             model=args.model_path,
             enable_lora=True,
             tensor_parallel_size=args.num_gpus,
-            seed = 0,
-        )        
+            seed=0,
+        )
     else:
         llm = LLM(
             model=args.model_path,
             tensor_parallel_size=args.num_gpus,
-            seed = 0,
+            seed=0,
             gpu_memory_utilization=args.gpu_memory_utilization,
         )
-        
+
     instruction_prompt = "Q:"
     answer_prompt = "\nA:"
 
     PROCESS_USER_PROMPT = (
-    "Please ensure your response begins with \"<reasoning>\n\". "
-    "Please reason, and put your final answer within \\boxed{}. "
-)
-    COT_ZEROS_PROMPT = (
-    "Let's repeat the question and also think step by step."
-)       
+        'Please ensure your response begins with "<reasoning>\n". '
+        "Please reason, and put your final answer within \\boxed{}. "
+    )
+    COT_ZEROS_PROMPT = "Let's repeat the question and also think step by step."
     with open(args.input_path, "r", encoding="utf-8") as f:
         data = list(map(json.loads, f))
 
     messages_list = []
     for d in data:
         user_messages = [
-            {"role": "user", "content": PROCESS_USER_PROMPT + instruction_prompt + d["text"] +"\n" + answer_prompt + COT_ZEROS_PROMPT}
+            {
+                "role": "user",
+                "content": PROCESS_USER_PROMPT
+                + instruction_prompt
+                + d["text"]
+                + "\n"
+                + answer_prompt
+                + COT_ZEROS_PROMPT,
+            }
         ]
         messages_list.append(user_messages)
 
@@ -83,12 +91,13 @@ def main():
         # \boxed{...} の中身を抽出する関数で回答を取得
         boxed_answer = extract_boxed_answer_rev(output.outputs[0].text)
         data[i]["response"] = boxed_answer
-        data[i]["processed"] = output.outputs[0].text    
+        data[i]["processed"] = output.outputs[0].text
 
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     with open(args.output_path, "w", encoding="utf-8") as f:
         for d in data:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
+
 
 if __name__ == "__main__":
     main()
