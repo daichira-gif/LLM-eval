@@ -122,7 +122,7 @@ def is_equiv(str1, str2, verbose=False):
             print(ss1, ss2)
         return ss1 == ss2
     except Exception:
-        return str1
+        return False
 
 
 def extract_boxed_answer_rev(text: str) -> str:
