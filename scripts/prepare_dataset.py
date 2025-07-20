@@ -3,7 +3,7 @@ from datasets import load_dataset
 
 def main():
     # Load the dataset from Hugging Face
-    dataset = load_dataset("KbsdJames/Omni-MATH", split="train")
+    dataset = load_dataset("KbsdJames/Omni-MATH", split="test")
 
     # Prepare the data in the desired format
     formatted_data = []
