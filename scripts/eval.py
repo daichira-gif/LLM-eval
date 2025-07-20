@@ -2,6 +2,7 @@ import argparse
 import logging
 from logging import getLogger, FileHandler, Formatter
 
+
 def _fix_fracs(string):
     substrs = string.split("\\frac")
     new_str = substrs[0]
@@ -33,6 +34,7 @@ def _fix_fracs(string):
     string = new_str
     return string
 
+
 def _fix_a_slash_b(string):
     if len(string.split("/")) != 2:
         return string
@@ -47,6 +49,7 @@ def _fix_a_slash_b(string):
     except:
         return string
 
+
 def _remove_right_units(string):
     # "\\text{ " only ever occurs (at least in the val set) when describing units
     if "\\text{ " in string:
@@ -56,11 +59,12 @@ def _remove_right_units(string):
     else:
         return string
 
+
 def _fix_sqrt(string):
     if "\\sqrt" not in string:
         return string
     splits = string.split("\\sqrt")
-    new_string = splits[0] 
+    new_string = splits[0]
     for split in splits[1:]:
         if split[0] != "{":
             a = split[0]
@@ -70,36 +74,37 @@ def _fix_sqrt(string):
         new_string += new_substr
     return new_string
 
+
 def _strip_string(string):
-    # linebreaks  
+    # linebreaks
     string = string.replace("\n", "")
-    #print(string)
+    # print(string)
 
     # remove inverse spaces
     string = string.replace("\\!", "")
-    #print(string)
+    # print(string)
 
     # replace \\ with \
     string = string.replace("\\\\", "\\")
-    #print(string)
+    # print(string)
 
     # replace tfrac and dfrac with frac
     string = string.replace("tfrac", "frac")
     string = string.replace("dfrac", "frac")
-    #print(string)
+    # print(string)
 
     # remove \left and \right
     string = string.replace("\\left", "")
     string = string.replace("\\right", "")
-    #print(string)
-    
+    # print(string)
+
     # Remove circ (degrees)
     string = string.replace("^{\\circ}", "")
     string = string.replace("^\\circ", "")
 
     # remove dollar signs
     string = string.replace("\\$", "")
-    
+
     # remove units (on the right)
     string = _remove_right_units(string)
 
@@ -139,6 +144,7 @@ def _strip_string(string):
 
     return string
 
+
 def is_equiv(str1, str2, verbose=False):
     if str1 is None and str2 is None:
         print("WARNING: Both None")
@@ -153,10 +159,10 @@ def is_equiv(str1, str2, verbose=False):
             print(ss1, ss2)
         return ss1 == ss2
     except:
-        return str1 
-
-import json
+        return False
+=import json
 from urllib import response
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -178,15 +184,15 @@ def main():
     # 2.handlerの設定
     # --------------------------------
     # handlerの生成
-    file_handler = FileHandler(args.log_path, 'a')
+    file_handler = FileHandler(args.log_path, "a")
 
     # handlerのログレベル設定(ハンドラが出力するエラーメッセージのレベル)
-    file_handler .setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.DEBUG)
 
     # ログ出力フォーマット設定
-    #handler_format = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler_format = Formatter('%(name)s - %(message)s')
-    file_handler .setFormatter(handler_format)
+    # handler_format = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler_format = Formatter("%(name)s - %(message)s")
+    file_handler.setFormatter(handler_format)
 
     # --------------------------------
     # 3.loggerにhandlerをセット
@@ -205,15 +211,20 @@ def main():
         failure = 0
         for line in f:
             input += 1
-            id = json.loads(line)['id']    
-            gold = json.loads(line)['gold']
-            response = json.loads(line)['response'] 
+            id = json.loads(line)["id"]
+            gold = json.loads(line)["gold"]
+            response = json.loads(line)["response"]
             if is_equiv(gold.strip(), response.strip()):
                 output += 1
-                logger.info(f"正解しました。 id: {id}, gold: {gold}, response: {response}")
-            elif response == "": # 未回答
+                logger.info(
+                    f"正解しました。 id: {id}, gold: {gold}, response: {response}"
+                )
+            elif response == "":  # 未回答
                 failure += 1
-        logger.info(f"評価 input: {input}, output: {output}, failure: {failure}, accuracy: {output/input}")
+        logger.info(
+            f"評価 input: {input}, output: {output}, failure: {failure}, accuracy: {output/input}"
+        )
+
 
 if __name__ == "__main__":
     main()

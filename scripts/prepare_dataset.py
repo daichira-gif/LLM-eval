@@ -1,6 +1,7 @@
 import json
 from datasets import load_dataset
 
+
 def main():
     # Load the dataset from Hugging Face
     dataset = load_dataset("KbsdJames/Omni-MATH", split="test")
@@ -14,7 +15,7 @@ def main():
             "gold": str(item["solution"]),
             "response": "",
             "type": item["domain"],
-            "level": item["difficulty"]
+            "level": item["difficulty"],
         }
         formatted_data.append(formatted_item)
 
@@ -22,6 +23,7 @@ def main():
     with open("input/omni_math.jsonl", "w", encoding="utf-8") as f:
         for item in formatted_data:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
+
 
 if __name__ == "__main__":
     main()

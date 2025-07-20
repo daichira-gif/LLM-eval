@@ -19,14 +19,16 @@ def main():
                 difficulty = 0
         if difficulty < 7:
             continue
-        formatted.append({
-            "id": idx,
-            "text": item["question"],
-            "gold": str(item["solution"]),
-            "response": "",
-            "type": item.get("domain", ""),
-            "level": difficulty,
-        })
+        formatted.append(
+            {
+                "id": idx,
+                "text": item["question"],
+                "gold": str(item["solution"]),
+                "response": "",
+                "type": item.get("domain", ""),
+                "level": difficulty,
+            }
+        )
         idx += 1
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
