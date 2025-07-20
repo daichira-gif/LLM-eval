@@ -27,7 +27,6 @@ export TEMPERATURE=0
 python scripts/openrouter_eval.py
 ```
 
-`OPENROUTER_API_KEY` must be set in the environment for API access.
 
 ## Round testing with `round_test.sh`
 
@@ -42,3 +41,19 @@ bash round_test.sh
 
 Results will be written under the directory specified by the `number`
 variable with an accompanying `info.txt` log.
+=======
+Make sure `OPENROUTER_API_KEY` is set in the environment to allow API access.
+
+## Development setup
+
+Install runtime requirements and the additional development tools:
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+pre-commit install
+```
+
+With the hooks installed, formatting and lint checks are run automatically on
+each commit.
+
