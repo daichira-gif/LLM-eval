@@ -55,6 +55,21 @@ export OPENROUTER_API_KEY=your_openrouter_key
 python scripts/openrouter_eval.py
 ```
 
+
+## Round testing with `round_test.sh`
+
+The `round_test.sh` helper script runs all evaluation prompts in sequence
+against a local model. Edit the variables at the top of the script to
+change the model name, dataset path and output location. After updating
+the parameters simply run:
+
+```bash
+bash round_test.sh
+```
+
+Results will be written under the directory specified by the `number`
+variable with an accompanying `info.txt` log.
+=======
 Make sure `OPENROUTER_API_KEY` is set in the environment to allow API access.
 
 
