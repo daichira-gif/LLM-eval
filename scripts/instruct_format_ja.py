@@ -34,13 +34,13 @@ def main():
     parser.add_argument("--input_path", type=str, required=True)
     parser.add_argument("--output_path", type=str, required=True)
     parser.add_argument("--num_gpus", type=int, default=1)
-    parser.add_argument("--enable_lora", type=str, default=False)
+    parser.add_argument("--enable_lora", action="store_true")
     parser.add_argument("--gpu_memory_utilization", type=float, default=0.9)
     parser.add_argument("--temperature", type=float, default=0.6)
 
     args = parser.parse_args()
 
-    if args.enable_lora == True:
+    if args.enable_lora:
         llm = LLM(
             model=args.model_path,
             enable_lora=True,
