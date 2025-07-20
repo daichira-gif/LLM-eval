@@ -1,7 +1,7 @@
 import os
 import json
 import argparse
-from vllm import LLM, SamplingParams
+from openai import OpenAI
 
 def extract_boxed_answer_rev(text: str) -> str:
     """
@@ -28,30 +28,17 @@ def extract_boxed_answer_rev(text: str) -> str:
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("model_path", type=str)
+    parser.add_argument("model_name", type=str, help="The model identifier on OpenRouter (e.g., google/gemini-pro)")
     parser.add_argument("--input_path", type=str, required=True)
     parser.add_argument("--output_path", type=str, required=True)
-    parser.add_argument("--num_gpus", type=int, default=1)
-    parser.add_argument("--enable_lora", type=str, default=False)
-    parser.add_argument("--gpu_memory_utilization", type=float, default=0.9)
     parser.add_argument("--temperature", type=float, default=0.6)
 
     args = parser.parse_args()
  
-    if args.enable_lora == True:
-        llm = LLM(
-            model=args.model_path,
-            enable_lora=True,
-            tensor_parallel_size=args.num_gpus,
-            seed = 0,
-        )        
-    else:
-        llm = LLM(
-            model=args.model_path,
-            tensor_parallel_size=args.num_gpus,
-            seed = 0,
-            gpu_memory_utilization=args.gpu_memory_utilization,
-        )
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.environ.get("OPENROUTER_API_KEY"),
+    )
             
     instruction_prompt = "Q:"
     answer_prompt = "\nA:"
@@ -60,77 +47,68 @@ def main():
     PROCESS_USER_PROMPT_EN = (
     "Please ensure your response begins with \"<reasoning>\n\". "
     "Please reason, and put your final answer within \\boxed{}. "
-) 
+)
     PROCESS_USER_PROMPT = (
     "回答は必ず \"<reasoning>\n\" で始まっていることを確認してください。"
     "理由を述べ、最終的な回答を \\boxed{} 内に記入してください。"
-)    
+)
     COT_ZEROS_PROMPT = (
     "ステップバイステップで考えてみましょう"
-)   
+)
     ECHO_PROMPT = (
     "問題を繰り返した後、ステップバイステップで考えてみましょう。"
-)     
+)
     
     with open(args.input_path, "r", encoding="utf-8") as f:
         data = list(map(json.loads, f))
 
-    messages_list = []
-    messages_list2 = []
-    messages_list3 = []
     for d in data:
-
+        # Construct the 3 prompts for the current data item 'd'
         instruction_text_en = PROCESS_USER_PROMPT_EN + instruction_prompt + d["text"]
         instruction_text = PROCESS_USER_PROMPT + instruction_prompt + d["text"]
         re_read_text = re_read_prompt + d["text"]
         answer_text = answer_prompt + COT_ZEROS_PROMPT
         echo_text = answer_prompt + ECHO_PROMPT
-        # echoprompt(ja)
-        user_messages = instruction_text + echo_text
-        messages_list.append(user_messages)
-        # re-reading(ja)
+
+        # Prompt 1: echoprompt(ja)
+        user_messages1 = instruction_text + echo_text
+        # Prompt 2: re-reading(ja)
         user_messages2 = instruction_text + re_read_text + answer_text
-        messages_list2.append(user_messages2)
-        # re-reading(mix)
+        # Prompt 3: re-reading(mix)
         user_messages3 = instruction_text_en + instruction_text + answer_text
-        messages_list3.append(user_messages3)
 
-    sampling_params1 = SamplingParams(
-        max_tokens=2048,
-        temperature=args.temperature,
-    )
-    sampling_params2 = SamplingParams(
-        max_tokens=2048,
-        temperature=args.temperature,
-    )
-    sampling_params3 = SamplingParams(
-        max_tokens=2048,
-        temperature=args.temperature,
-    )
+        # API Call 1
+        completion1 = client.chat.completions.create(
+            model=args.model_name,
+            messages=[{"role": "user", "content": user_messages1}],
+            max_tokens=2048,
+            temperature=args.temperature,
+        )
+        response_text1 = completion1.choices[0].message.content
+        d["answer1"] = extract_boxed_answer_rev(response_text1)
 
-    # re-reading(ja)
-    outputs2 = llm.generate(messages_list2, sampling_params=sampling_params2)
-    for i, output in enumerate(outputs2):
-            # \boxed{...} の中身を抽出する関数で回答を取得
-        boxed_answer = extract_boxed_answer_rev(output.outputs[0].text)
-        data[i]["answer2"] = boxed_answer
+        # API Call 2
+        completion2 = client.chat.completions.create(
+            model=args.model_name,
+            messages=[{"role": "user", "content": user_messages2}],
+            max_tokens=2048,
+            temperature=args.temperature,
+        )
+        response_text2 = completion2.choices[0].message.content
+        d["answer2"] = extract_boxed_answer_rev(response_text2)
 
-    # echoprompt(ja)
-    outputs1 = llm.generate(messages_list, sampling_params=sampling_params1)    
-    for i, output in enumerate(outputs1):
-            # \boxed{...} の中身を抽出する関数で回答を取得
-        boxed_answer = extract_boxed_answer_rev(output.outputs[0].text)
-        data[i]["answer1"] = boxed_answer
-                           
-    # re-reading(mix)
-    outputs3 = llm.generate(messages_list3, sampling_params=sampling_params3)
-    for i, output in enumerate(outputs3):
-            # \boxed{...} の中身を抽出する関数で回答を取得
-        boxed_answer = extract_boxed_answer_rev(output.outputs[0].text)
-        data[i]["answer3"] = boxed_answer
-               
-    for d in data:
-        d["response"] = d["answer2"]        
+        # API Call 3
+        completion3 = client.chat.completions.create(
+            model=args.model_name,
+            messages=[{"role": "user", "content": user_messages3}],
+            max_tokens=2048,
+            temperature=args.temperature,
+        )
+        response_text3 = completion3.choices[0].message.content
+        d["answer3"] = extract_boxed_answer_rev(response_text3)
+
+        # Logic for final response selection remains the same
+        d["response"] = d["answer2"]
         if d["answer1"] == d["answer3"]:
             d["response"] = d["answer3"]
 
