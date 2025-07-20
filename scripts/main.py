@@ -3,6 +3,7 @@ import json
 import argparse
 from openai import OpenAI
 
+
 def extract_boxed_answer_rev(text: str) -> str:
     """
     テキスト中から最初の \boxed{...} の中身（ネストを考慮）を抽出する。
@@ -23,42 +24,43 @@ def extract_boxed_answer_rev(text: str) -> str:
             brace_count -= 1
         i += 1
     # i-1 が閉じ括弧に対応する位置
-    return text[start_idx:i-1].strip().replace(",","")
+    return text[start_idx : i - 1].strip().replace(",", "")
+
 
 def main():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("model_name", type=str, help="The model identifier on OpenRouter (e.g., google/gemini-pro)")
+    parser.add_argument(
+        "model_name",
+        type=str,
+        help="The model identifier on OpenRouter (e.g., google/gemini-pro)",
+    )
     parser.add_argument("--input_path", type=str, required=True)
     parser.add_argument("--output_path", type=str, required=True)
     parser.add_argument("--temperature", type=float, default=0.6)
 
     args = parser.parse_args()
- 
+
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=os.environ.get("OPENROUTER_API_KEY"),
     )
-            
+
     instruction_prompt = "Q:"
     answer_prompt = "\nA:"
     re_read_prompt = "もう一度問題を読んでみましょう:"
 
     PROCESS_USER_PROMPT_EN = (
-    "Please ensure your response begins with \"<reasoning>\n\". "
-    "Please reason, and put your final answer within \\boxed{}. "
-)
+        'Please ensure your response begins with "<reasoning>\n". '
+        "Please reason, and put your final answer within \\boxed{}. "
+    )
     PROCESS_USER_PROMPT = (
-    "回答は必ず \"<reasoning>\n\" で始まっていることを確認してください。"
-    "理由を述べ、最終的な回答を \\boxed{} 内に記入してください。"
-)
-    COT_ZEROS_PROMPT = (
-    "ステップバイステップで考えてみましょう"
-)
-    ECHO_PROMPT = (
-    "問題を繰り返した後、ステップバイステップで考えてみましょう。"
-)
-    
+        '回答は必ず "<reasoning>\n" で始まっていることを確認してください。'
+        "理由を述べ、最終的な回答を \\boxed{} 内に記入してください。"
+    )
+    COT_ZEROS_PROMPT = "ステップバイステップで考えてみましょう"
+    ECHO_PROMPT = "問題を繰り返した後、ステップバイステップで考えてみましょう。"
+
     with open(args.input_path, "r", encoding="utf-8") as f:
         data = list(map(json.loads, f))
 
@@ -116,6 +118,7 @@ def main():
     with open(args.output_path, "w", encoding="utf-8") as f:
         for d in data:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
+
 
 if __name__ == "__main__":
     main()

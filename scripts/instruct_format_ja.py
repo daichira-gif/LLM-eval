@@ -3,6 +3,7 @@ import json
 import argparse
 from vllm import LLM, SamplingParams
 
+
 def extract_boxed_answer_rev(text: str) -> str:
     """
     テキスト中から最初の \boxed{...} の中身（ネストを考慮）を抽出する。
@@ -23,7 +24,8 @@ def extract_boxed_answer_rev(text: str) -> str:
             brace_count -= 1
         i += 1
     # i-1 が閉じ括弧に対応する位置
-    return text[start_idx:i-1].strip().replace(",","")
+    return text[start_idx : i - 1].strip().replace(",", "")
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -43,31 +45,36 @@ def main():
             model=args.model_path,
             enable_lora=True,
             tensor_parallel_size=args.num_gpus,
-            seed = 0,
-        )        
+            seed=0,
+        )
     else:
         llm = LLM(
             model=args.model_path,
             tensor_parallel_size=args.num_gpus,
-            seed = 0,
+            seed=0,
             gpu_memory_utilization=args.gpu_memory_utilization,
         )
-        
+
     instruction_prompt = "Q:"
     answer_prompt = "\nA:"
 
-
     PROCESS_USER_PROMPT = (
-    "回答は必ず \"<reasoning>\n\" で始まっていることを確認してください。"
-    "理由を述べ、最終的な回答を \\boxed{} 内に記入してください。"
-)       
+        '回答は必ず "<reasoning>\n" で始まっていることを確認してください。'
+        "理由を述べ、最終的な回答を \\boxed{} 内に記入してください。"
+    )
     with open(args.input_path, "r", encoding="utf-8") as f:
         data = list(map(json.loads, f))
 
     messages_list = []
     for d in data:
         user_messages = [
-            {"role": "user", "content": PROCESS_USER_PROMPT + instruction_prompt + d["text"] + answer_prompt}
+            {
+                "role": "user",
+                "content": PROCESS_USER_PROMPT
+                + instruction_prompt
+                + d["text"]
+                + answer_prompt,
+            }
         ]
         messages_list.append(user_messages)
 
@@ -78,15 +85,16 @@ def main():
 
     outputs = llm.chat(messages_list, sampling_params=sampling_params1)
     for i, output in enumerate(outputs):
-            # \boxed{...} の中身を抽出する関数で回答を取得
+        # \boxed{...} の中身を抽出する関数で回答を取得
         boxed_answer = extract_boxed_answer_rev(output.outputs[0].text)
         data[i]["response"] = boxed_answer
-        data[i]["processed"] = output.outputs[0].text    
+        data[i]["processed"] = output.outputs[0].text
 
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     with open(args.output_path, "w", encoding="utf-8") as f:
         for d in data:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
+
 
 if __name__ == "__main__":
     main()
