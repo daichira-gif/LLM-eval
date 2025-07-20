@@ -153,7 +153,7 @@ def is_equiv(str1, str2, verbose=False):
             print(ss1, ss2)
         return ss1 == ss2
     except:
-        return str1 
+        return False
 
 import json
 from urllib import response
